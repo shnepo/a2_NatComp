@@ -1,4 +1,3 @@
-from randomSearch import RandomSearch as RS
 from ga import GeneticAlgorithm as GA
 import matplotlib.pyplot as plt
 import numpy as np
