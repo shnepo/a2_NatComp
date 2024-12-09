@@ -287,22 +287,25 @@ if __name__ == "__main__":
     # Below are a few examples of using the TSP class.
     # We can either use it as a context manager (i.e. with a with statement)
     # If we set plot=True, an interactive figure will appear
-    with TSP(plot=True) as tsp:
+    #with TSP(plot=True) as tsp:
         # Sample a 10 random paths
-        for _ in range(10):
+        #for _ in range(10):
             # Sample a random path
-            random_path = np.random.permutation(tsp.dim)
+            #random_path = np.random.permutation(tsp.dim)
             # Here we can use tsp as a function
-            path_length = tsp(random_path)
+            #path_length = tsp(random_path)
             # Display the path
-            tsp.plot_route(random_path, path_length)
+            #tsp.plot_route(random_path, path_length)
             # Input something to continue
-            input()
+            #input()
 
     # Alternatively, you can use the object only for the TSP function,
     # and dont use the plot
     tsp = TSP(plot=False)
     # Get the path length
-    random_path = np.random.permutation(tsp.dim)
-    route_length = tsp(random_path)
-    print(f"Random path length {route_length: .2f}km")
+    random_path = range(tsp.dim)
+    full_route = tsp.create_path(random_path) # this creates a full route with leiden in it 
+    print(full_route)
+    print(tsp.dim)
+    print(len(full_route))
+    #print(f"Random path length {route_length: .2f}km")
