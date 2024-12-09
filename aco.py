@@ -1,12 +1,11 @@
 from tsp import *
+import random
 
 class ACO():
-    # possible parameters: nAnts, Alpha=4, Beta=1, constant_q, initial_pheromones, proximity_constant, list_of_cities
     def __init__(self, nAnts=None, initial_pher=0.200, proximity_constant=1, evaporation_constant=0.35, pheromone_constant=4, alpha=1, beta=1):
         ''' Class that implements a solution to TSP using Ant Colony Optimization
         
         initial_pher: indicates the initial amount of pheromones present on each edge
-        
         
         '''
         self.nAnts = nAnts
@@ -77,12 +76,11 @@ class ACO():
         
         for route in self.ant_routes:
             route_length = self.tsp(route)
-            leiden_route = self.tsp.create_path(route)[:-1]
-            for i, j in zip(leiden_route, leiden_route[1:]): # go through each edge in route and update pheremones appriopriatly
+            route.append(0)
+            for i, j in zip(route, route[1:]): # go through each edge in route and update pheremones appriopriatly
                 index = self.get_idx_PherProxMap(i, j)
                 current_pheremone = self.pher_prox_map[index][0]
                 self.pher_prox_map[index][0] = current_pheremone + (self.Q/route_length)
-        
         return
     
     def calculate_desire(self, i, j):
@@ -109,24 +107,66 @@ class ACO():
         
         return probs
     
+    def choose_city(self, start_city, allowed_cities):
+        """choose a city from the given possible cities and the current start city. 
+        Returns the chosen city"""
+        probs = self.prob_to_go_to_cities(start_city, allowed_cities)
+        
+        if (len(probs) == 0):
+            return 
+        
+        chosen_city = random.choices(list(probs.keys()), weights=list(probs.values()), k=1)[0]
+        
+        return chosen_city
+    
     def generate_ant_routes(self):
         
-        cities_without_leiden = range(1, len(self.cities))
-        start_city = 1
-        ant_number = 0
+        cities_without_leiden = list(range(1, len(self.cities))) #initalize cities without leiden in it
+        start_city = 1 #initializing start city 
         
-        
-        
+        for ant in range(self.nAnts):
+            allowed_cities = None # allowed_cities and current_cities gets reset for each ant
+            current_city = None
+            for city_slot in range(self.n):
+
+                # Current_city == none means we have not started route yet
+                if (current_city == None):
+                    # update current city_slot with the start_city
+                    self.ant_routes[ant, city_slot] = start_city
+                    allowed_cities = list(filter(lambda x: x != start_city, cities_without_leiden)) # removing current city from cities allowed to go to
+                    chosen_city = self.choose_city(start_city, allowed_cities)
+                    current_city = chosen_city
+                    start_city += 1 #increase the start city for the next iteration so next ant starts its route on diff city
+                    continue
+                
+                # update ant_route after initial start_city
+                self.ant_routes[ant, city_slot] = current_city
+                allowed_cities = list(filter(lambda x: x != current_city, allowed_cities))
+                chosen_city = self.choose_city(current_city, allowed_cities)
+                current_city = chosen_city
+                
         return 
         
     def main(self):
         '''Main loop'''
         
-        return 
+        for _ in range(self.n): # random amount of loops, must still implement some stopping parameter
+            self.generate_ant_routes()
+            # update pheromones
+            self.evaporation_update()
+            self.ant_pheremone_update()
+        
+        self.generate_ant_routes()
+        shortest_route = np.inf
+        for route in self.ant_routes():
+            route_length = self.tsp(route)
+            shortest_route = min(shortest_route, route_length)
+        
+        return shortest_route
         
 
 #testing
 aco_object = ACO()
-print(aco_object.prob_to_go_to_cities(2, [3, 4, 5, 6]))
+print(aco_object.ant_pheremone_update())
 
 
