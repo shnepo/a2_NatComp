@@ -2,7 +2,7 @@ from tsp import *
 
 class ACO():
     # possible parameters: nAnts, Alpha=4, Beta=1, constant_q, initial_pheromones, proximity_constant, list_of_cities
-    def __init__(self, nAnts=None, initial_pher=0.200, proximity_constant=1, evaporation_constant=0.35, pheromone_constant=4):
+    def __init__(self, nAnts=None, initial_pher=0.200, proximity_constant=1, evaporation_constant=0.35, pheromone_constant=4, alpha=1, beta=1):
         ''' Class that implements a solution to TSP using Ant Colony Optimization
         
         initial_pher: indicates the initial amount of pheromones present on each edge
@@ -14,6 +14,8 @@ class ACO():
         self.C = proximity_constant
         self.evap_constant = evaporation_constant
         self.Q = pheromone_constant
+        self.alpha = alpha
+        self.beta = beta
         
         self.tsp = TSP(plot=False)
         self.n = self.tsp.dim 
@@ -75,15 +77,46 @@ class ACO():
         
         for route in self.ant_routes:
             route_length = self.tsp(route)
-            leiden_route = 
-            for i, j in zip(route, route[1:]): # go through each edge in route and update pheremones appriopriatly
+            leiden_route = self.tsp.create_path(route)[:-1]
+            for i, j in zip(leiden_route, leiden_route[1:]): # go through each edge in route and update pheremones appriopriatly
                 index = self.get_idx_PherProxMap(i, j)
                 current_pheremone = self.pher_prox_map[index][0]
                 self.pher_prox_map[index][0] = current_pheremone + (self.Q/route_length)
         
         return
+    
+    def calculate_desire(self, i, j):
+        '''Calculate the desire to go from city i to city j. Returns the desire as a float. 
+        Helper method for generete_ant_routes'''
+        index = self.get_idx_PherProxMap(i, j)
+        pher, prox = self.pher_prox_map[index]
+        return (pher**self.alpha)*(prox**self.beta)
+    
+    def prob_to_go_to_cities(self, ant_location: int, allowed_cities: list):
+        """Calculates the probability of going to each city that is still allowed in a dictionary, where the length of
+        the dict is equal to the allowed_cities.
+        ant_location(int): current city ant is located in"""
         
+        probs = {}
+        desires = []
+        # first getting each indivdual desire from current ant location to every available city
+        for city in allowed_cities:
+            desires.append(self.calculate_desire(ant_location, city))
+        
+        # then taking each city and calculating probability. prob = (desire to specific city/sum of desires for all cities)
+        for index, city in enumerate(allowed_cities):
+            probs[city] = ((desires[index])/sum(desires))
+        
+        return probs
+    
     def generate_ant_routes(self):
+        
+        cities_without_leiden = range(1, len(self.cities))
+        start_city = 1
+        ant_number = 0
+        
+        
+        
         return 
         
     def main(self):
@@ -94,6 +127,6 @@ class ACO():
 
 #testing
 aco_object = ACO()
-print(len(aco_object.cities))
+print(aco_object.prob_to_go_to_cities(2, [3, 4, 5, 6]))
 
 
