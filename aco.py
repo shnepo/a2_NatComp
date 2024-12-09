@@ -76,6 +76,7 @@ class ACO():
         
         for route in self.ant_routes:
             route_length = self.tsp(route)
+            route.insert(0, 0) # adding leiden to the route as leiden represent 0 
             route.append(0)
             for i, j in zip(route, route[1:]): # go through each edge in route and update pheremones appriopriatly
                 index = self.get_idx_PherProxMap(i, j)
