@@ -153,10 +153,12 @@ class ACO():
         cities_integers = list(range(len(self.cities)))
         position = start_position
         
-        for _ in range(self.n): 
+        for _ in range(self.n + 1): 
+            if (len(cities_integers) == 0):
+                break
             route.append(position)
-            allowed_cities = list(filter(lambda x: x != start_position, cities_integers))
-            chosen_city = self.choose_city(start_position, allowed_cities)
+            cities_integers.remove(position)
+            chosen_city = self.choose_city(start_position, cities_integers)
             position = chosen_city
         
         return route
