@@ -180,6 +180,6 @@ class ACO():
 
 #testing
 aco_object = ACO()
-print(aco_object.generate_single_route(0))
+print(aco_object.generate_single_route(0)) # the route has multiple of the same cities. This means Im not correctly deleteing the allowed cities from generete route methods. 
 
 
