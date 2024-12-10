@@ -22,7 +22,7 @@ class ACO():
             self.nAnts = self.n + 1 # number of ants equal to number of cities. + 1 for leiden 
 
         self.cities = self.tsp.create_path(range(self.n))[:-1] # this creates a array of coordinates(lng, lat) of each city starting with leiden at index 0 
-        self.ant_routes = np.zeros((self.nAnts, self.n))
+        self.ant_routes = np.zeros((self.nAnts, self.n + 1))
         self.pher_prox_map = self.init_PherProxMap()
     
     def get_idx_PherProxMap(self, i, j):
@@ -76,8 +76,7 @@ class ACO():
         
         for route in self.ant_routes:
             route_length = self.tsp(route)
-            route.insert(0, 0) # adding leiden to the route as leiden represent 0 
-            route.append(0)
+
             for i, j in zip(route, route[1:]): # go through each edge in route and update pheremones appriopriatly
                 index = self.get_idx_PherProxMap(i, j)
                 current_pheremone = self.pher_prox_map[index][0]
@@ -122,8 +121,8 @@ class ACO():
     
     def generate_ant_routes(self):
         
-        cities_without_leiden = list(range(1, len(self.cities))) #initalize cities without leiden in it
-        start_city = 1 #initializing start city 
+        cities_integers = list(range(len(self.cities))) 
+        start_city = cities_integers[0] #initializing start city 
         
         for ant in range(self.nAnts):
             allowed_cities = None # allowed_cities and current_cities gets reset for each ant
@@ -134,7 +133,7 @@ class ACO():
                 if (current_city == None):
                     # update current city_slot with the start_city
                     self.ant_routes[ant, city_slot] = start_city
-                    allowed_cities = list(filter(lambda x: x != start_city, cities_without_leiden)) # removing current city from cities allowed to go to
+                    allowed_cities = list(filter(lambda x: x != start_city, cities_integers)) # removing current city from cities allowed to go to
                     chosen_city = self.choose_city(start_city, allowed_cities)
                     current_city = chosen_city
                     start_city += 1 #increase the start city for the next iteration so next ant starts its route on diff city
@@ -147,7 +146,21 @@ class ACO():
                 current_city = chosen_city
                 
         return 
+    
+    def generate_single_route(self, start_position):
+        """returns a single route"""
+        route = []
+        cities_integers = list(range(len(self.cities)))
+        position = start_position
         
+        for _ in range(self.n): 
+            route.append(position)
+            allowed_cities = list(filter(lambda x: x != start_position, cities_integers))
+            chosen_city = self.choose_city(start_position, allowed_cities)
+            position = chosen_city
+        
+        return route
+            
     def main(self):
         '''Main loop'''
         
@@ -157,17 +170,16 @@ class ACO():
             self.evaporation_update()
             self.ant_pheremone_update()
         
-        self.generate_ant_routes()
-        shortest_route = np.inf
-        for route in self.ant_routes():
-            route_length = self.tsp(route)
-            shortest_route = min(shortest_route, route_length)
+        # pick the route that starts at 0 aka Leiden
+        shortest_route = self.generate_single_route()
         
-        return shortest_route
+        shortest_route_length = self.tsp(shortest_route[1:])
+        
+        return shortest_route, shortest_route_length
         
 
 #testing
 aco_object = ACO()
-print(aco_object.ant_pheremone_update())
+print(aco_object.generate_single_route(0))
 
 
